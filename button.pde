@@ -34,7 +34,10 @@ class button {
   }
   void display() {
     fill(255);
-    ellipse(pos.x, pos.y, d, d);
+    textSize(13 * ts);
+    text(title, pos.x, pos.y);
     noFill();
+    stroke(255);
+    ellipse(pos.x, pos.y, d, d);
   }
 }

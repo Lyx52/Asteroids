@@ -22,7 +22,7 @@ class bullet {
       fill(255,0,0);
       translate(bulpos.x, bulpos.y);
       rotate(ang);
-      ellipse(0,0,bulSize,bulSize);
+      ellipse(0,0,bulletSize,bulletSize);
     popMatrix();
   }
 }

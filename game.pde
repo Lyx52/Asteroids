@@ -1,29 +1,40 @@
 import android.util.DisplayMetrics;
 player p;
 float ts = 0, 
-      playerSize = 64, asteroidSize = 48, defBtnSize = 80, bulSize = 8,
-      currentTime = 0, lastTime = 0, deltaTime = 0;
-String gameState = "ingame";
-int tempTouches = 0;
+      playerSize = 64, 
+      asteroidSize = 48, 
+      btnSize = 80, 
+      bulletSize = 8,
+      currentTime = 0, 
+      lastTime = 0, 
+      deltaTime = 0;
+double spawnRate = 30; //Every 30 frames
+String gameState = "ingame"; //Gamestate (ingame;menu;settings)
 ArrayList<button> btn = new ArrayList<button>();
 ArrayList<asteroid> a = new ArrayList<asteroid>();
+
 void settings(){
   fullScreen(JAVA2D);
 }
 void setup(){
+  
   //Setup scaling
-  orientation(LANDSCAPE);
+  orientation(LANDSCAPE); 
   DisplayMetrics metrics = new DisplayMetrics();    
-  getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);    
+  getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics); 
+  
   int screenDensity = metrics.densityDpi; 
   ts = screenDensity/160;
   ts = ts > 2 ? ts - 0.5 : ts;
-  bulSize *= ts;
+  
+  bulletSize *= ts;
   asteroidSize *= ts;
   playerSize *= ts;
-  defBtnSize *= ts;
+  btnSize *= ts;
+  
   textAlign(CENTER,CENTER);
   rectMode(CENTER);
+  
   p = new player(width / 2, width / 2);
   createButtons();
 }
@@ -31,14 +42,16 @@ void setup(){
 void draw(){
   if (gameState.equals("ingame")) {
     background(0);
+    
     p = p.HP <= 0 ? new player(width / 2, width / 2) : p;
     p.update();
+    
     if (a.size() > 0) {
       for (int i  = 0; i < a.size(); i++) {
         a.get(i).update();
         if (p.bul.size() > 0) {
           for (int b = 0; b < p.bul.size(); b++) {
-            if (dist(p.bul.get(b).bulpos.x, p.bul.get(b).bulpos.y, a.get(i).pos.x, a.get(i).pos.y) <= (bulSize / 2 + asteroidSize / 2)) {
+            if (dist(p.bul.get(b).bulpos.x, p.bul.get(b).bulpos.y, a.get(i).pos.x, a.get(i).pos.y) <= (bulletSize / 2 + asteroidSize / 2)) {
               p.bul.get(b).remove = true;
               a.get(i).HP -= p.staticDamage + random(p.maxCritDamage);
               if (a.get(i).HP <= 0) {
@@ -50,6 +63,7 @@ void draw(){
         }
       }
     }
+    
     if (touches.length < 0) {
       for (int i = 0; i< btn.size(); i++) {
         btn.get(i).pressed = false;  
@@ -58,7 +72,7 @@ void draw(){
     for (int i = 0; i < btn.size(); i++) {
       btn.get(i).update();
     }
-    if (frameCount % 30 == 0) {
+    if (frameCount % spawnRate == 0) {
       switch(int(random(0,3))) {
         case 0 : {
           a.add(new asteroid(int(random(-asteroidSize, -asteroidSize / 4)), int(random(-asteroidSize, height + asteroidSize))));
@@ -78,11 +92,13 @@ void draw(){
         }
       }
     }
+    
     deltaTime();
     textSize(10 * ts);
     text("FPS: " + int(frameRate),15 * ts, height - (15 * ts));
   }  
 }
+
 void createButtons() {
   for (int i = 0; i < 5; i++) {
     switch(i) {
@@ -109,6 +125,7 @@ void createButtons() {
     }
   }
 }
+
 float deltaTime() {
   float currentTime = millis();
   if (lastTime == 0) {
@@ -122,7 +139,7 @@ float deltaTime() {
 }
 boolean returnButton(float xpos, float ypos) {
   for (int i = 0; i < touches.length; i++) {
-    if (dist(xpos, ypos, touches[i].x, touches[i].y) <= defBtnSize / 1.5) {
+    if (dist(xpos, ypos, touches[i].x, touches[i].y) <= btnSize / 1.5) {
       return true;  
     } else continue;
   }
