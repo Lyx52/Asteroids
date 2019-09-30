@@ -2,7 +2,7 @@ class button {
   PVector pos;
   boolean visible = false, pressed = false;
   String title = "";
-  int d = 0;
+  int d = 0, touchCount = 0;
   button(String t, int xpos, int ypos, int diam, boolean v) {
     visible = v;
     title = t;

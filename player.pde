@@ -1,8 +1,8 @@
 class player {
   PVector pos;
   float vx = 0, vy = 0, ang = 0,
-        acc = 0.009, rotAcc = 0.05,
-        defacc = 0, staticDamage = 5, maxCritDamage = 3,
+        acc = 0.007, rotAcc = 0.07,
+        defacc = 0, staticDamage = 15, maxCritDamage = 4,
         HP = 100;
         
   int bulletLastFrame = 0;

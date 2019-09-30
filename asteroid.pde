@@ -25,16 +25,22 @@ class asteroid {
   void update() {
     display();
     remove = (pos.x <= -asteroidSize * 2) || (pos.x >= width + asteroidSize * 2) || (pos.y <= -asteroidSize * 2) || (pos.y >= height + asteroidSize * 2);  
-    if (dist(pos.x, pos.y, p.pos.x, p.pos.y) <= (asteroidSize / 2) + (playerSize / 2)) {
-      dealDamage();
-    }
     pos.x += (acc * cos(ang)) * deltaTime;
     pos.y += (acc * sin(ang)) * deltaTime;
-  }
-  void dealDamage() {
-    p.HP -= p.staticDamage *0.75;
-    remove = true;
-    return;
+    if (dist(pos.x, pos.y, p.pos.x, p.pos.y) <= (asteroidSize / 2) + (playerSize / 2)) {
+      p.HP -= p.staticDamage;
+      remove = true;
+    } else if (p.bul.size() > 0) {
+      for (int b = 0; b < p.bul.size(); b++) {
+        if (dist(p.bul.get(b).bulpos.x, p.bul.get(b).bulpos.y, pos.x, pos.y) <= (bulletSize / 2 + asteroidSize / 2)) {
+          p.bul.get(b).remove = true;
+          HP -= p.staticDamage + random(p.maxCritDamage);
+          if (HP <= 0) {
+            remove = true;
+          }
+        }
+      }
+    }
   }
   void display() {
     strokeWeight(2);

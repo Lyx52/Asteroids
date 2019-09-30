@@ -2,8 +2,7 @@ class bullet {
   PVector bulpos;
   float ang = 0;
   float acc = 0.3;
-  boolean remove = false,
-          r = false;
+  boolean remove = false;
   bullet(float a) {
     bulpos = new PVector(p.pos.x + p.vx, p.pos.y + p.vy);
     ang = a;

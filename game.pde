@@ -8,6 +8,8 @@ float ts = 0,
       currentTime = 0, 
       lastTime = 0, 
       deltaTime = 0;
+      
+PVector shootPos, movePos;
 double spawnRate = 30; //Every 30 frames
 String gameState = "ingame"; //Gamestate (ingame;menu;settings)
 ArrayList<button> btn = new ArrayList<button>();
@@ -34,7 +36,8 @@ void setup(){
   
   textAlign(CENTER,CENTER);
   rectMode(CENTER);
-  
+  movePos = new PVector(int(width - (100*ts)),int(height - (100*ts)));
+  shootPos = new PVector(int(50*ts), int(height - (50*ts)));
   p = new player(width / 2, width / 2);
   createButtons();
 }
@@ -48,19 +51,11 @@ void draw(){
     
     if (a.size() > 0) {
       for (int i  = 0; i < a.size(); i++) {
-        a.get(i).update();
-        if (p.bul.size() > 0) {
-          for (int b = 0; b < p.bul.size(); b++) {
-            if (dist(p.bul.get(b).bulpos.x, p.bul.get(b).bulpos.y, a.get(i).pos.x, a.get(i).pos.y) <= (bulletSize / 2 + asteroidSize / 2)) {
-              p.bul.get(b).remove = true;
-              a.get(i).HP -= p.staticDamage + random(p.maxCritDamage);
-              if (a.get(i).HP <= 0) {
-                a.remove(i);
-                continue;
-              }
-            }
-          }
+        if (a.get(i).remove) {
+          a.remove(i);
+          continue;
         }
+        a.get(i).update();
       }
     }
     
@@ -103,23 +98,23 @@ void createButtons() {
   for (int i = 0; i < 5; i++) {
     switch(i) {
       case 0 : {
-        btn.add(new button("left", int(width - (150*ts)), int(height - (100*ts)), int(50 * ts), true)); 
+        btn.add(new button("right", (int) (movePos.x + (50 * ts)), (int) movePos.y, int(50 * ts), true)); 
         break;
       }
       case 1 : {
-        btn.add(new button("right", int(width - (50*ts)), int(height - (100*ts)), int(50 * ts), true)); 
+        btn.add(new button("left", (int) (movePos.x - (50 * ts)), (int) movePos.y, int(50 * ts), true)); 
         break;
       }
       case 2 : {
-        btn.add(new button("up", int(width - (100*ts)), int(height - (150*ts)), int(50 * ts), true)); 
+        btn.add(new button("down", (int) movePos.x, (int) (movePos.y + (50 * ts)), int(50 * ts), true)); 
         break;
       }
       case 3 : {
-        btn.add(new button("down", int(width - (100*ts)), int(height - (50*ts)), int(50 * ts), true)); 
+        btn.add(new button("up", (int) movePos.x, (int) (movePos.y - (50 * ts)), int(50 * ts), true)); 
         break;
       }
       case 4 : {
-        btn.add(new button("shoot", int(50*ts), int(height - (50*ts)), int(50*ts), true)); 
+        btn.add(new button("shoot", (int) shootPos.x, (int) shootPos.y, int(50*ts), true)); 
         break;  
       }
     }
