@@ -2,7 +2,7 @@ class player {
   PVector pos;
   float vx = 0, vy = 0, ang = 0,
         acc = 0.007, rotAcc = 0.07,
-        defacc = 0, staticDamage = 15, maxCritDamage = 4,
+        defacc = 0, staticDamage = 40, maxCritDamage = 4,
         HP = 100;
         
   int bulletLastFrame = 0;
@@ -37,6 +37,12 @@ class player {
     
   }
   void shoot() {
+    if (touches.length == 1) {
+      p.left = false;
+      p.right = false;
+      p.up = false;
+      p.down = false;
+    }
     if (frameCount - bulletLastFrame > 10 && shoot){
       bul.add(new bullet(ang)); 
       bulletLastFrame = frameCount;

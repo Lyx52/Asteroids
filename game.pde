@@ -14,7 +14,7 @@ double spawnRate = 30; //Every 30 frames
 String gameState = "ingame"; //Gamestate (ingame;menu;settings)
 ArrayList<button> btn = new ArrayList<button>();
 ArrayList<asteroid> a = new ArrayList<asteroid>();
-
+menu mainMenu;
 void settings(){
   fullScreen(JAVA2D);
 }
@@ -40,12 +40,14 @@ void setup(){
   shootPos = new PVector(int(50*ts), int(height - (50*ts)));
   p = new player(width / 2, width / 2);
   createButtons();
+  mainMenu = new menu();
 }
  
 void draw(){
-  if (gameState.equals("ingame")) {
-    background(0);
-    
+  background(0);
+  if (gameState.equals("menu")) {
+    mainMenu.update();  
+  } else if (gameState.equals("ingame")) {
     p = p.HP <= 0 ? new player(width / 2, width / 2) : p;
     p.update();
     
@@ -59,46 +61,42 @@ void draw(){
       }
     }
     
-    if (touches.length < 0) {
-      for (int i = 0; i< btn.size(); i++) {
-        btn.get(i).pressed = false;  
-      }
-    }
-    for (int i = 0; i < btn.size(); i++) {
-      btn.get(i).update();
-    }
     if (frameCount % spawnRate == 0) {
       switch(int(random(0,3))) {
         case 0 : {
-          a.add(new asteroid(int(random(-asteroidSize, -asteroidSize / 4)), int(random(-asteroidSize, height + asteroidSize))));
+          a.add(new asteroid(int(random(-asteroidSize, -asteroidSize / 4)), int(random(-asteroidSize, height + asteroidSize)), random(360), asteroidSize));
           break;
         }
         case 1 : {
-          a.add(new asteroid(int(random(-asteroidSize, width + asteroidSize)), int(random(-asteroidSize, -asteroidSize / 4))));
+          a.add(new asteroid(int(random(-asteroidSize, width + asteroidSize)), int(random(-asteroidSize, -asteroidSize / 4)), random(360), asteroidSize));
           break;
         }
         case 2 : {
-          a.add(new asteroid(int(random(width + asteroidSize / 4, width + asteroidSize)), int(random(-asteroidSize, height + asteroidSize))));
+          a.add(new asteroid(int(random(width + asteroidSize / 4, width + asteroidSize)), int(random(-asteroidSize, height + asteroidSize)), random(360), asteroidSize));
           break;
         }
         case 3 : {
-          a.add(new asteroid(int(random(-asteroidSize, width + asteroidSize)), int(random(height + asteroidSize / 4, height + asteroidSize))));
+          a.add(new asteroid(int(random(-asteroidSize, width + asteroidSize)), int(random(height + asteroidSize / 4, height + asteroidSize)), random(360), asteroidSize));
           break;
         }
       }
     }
     
+    for (int i = 0; i < btn.size(); i++) {
+      btn.get(i).update();
+    }
+    
     deltaTime();
-    textSize(10 * ts);
-    text("FPS: " + int(frameRate),15 * ts, height - (15 * ts));
+    textSize(12 * ts);
+    fill(255);
+    text("FPS: " + int(frameRate),20 * ts, height - (18 * ts));
   }  
 }
-
 void createButtons() {
   for (int i = 0; i < 5; i++) {
     switch(i) {
       case 0 : {
-        btn.add(new button("right", (int) (movePos.x + (50 * ts)), (int) movePos.y, int(50 * ts), true)); 
+       btn.add(new button("right", (int) (movePos.x + (50 * ts)), (int) movePos.y, int(50 * ts), true)); 
         break;
       }
       case 1 : {
@@ -120,7 +118,16 @@ void createButtons() {
     }
   }
 }
-
+void touchesMoved() {
+  for (int i = 0; i < btn.size(); i++) {
+    btn.get(i).update();
+  }  
+}
+void touchesEnded() {
+  for (int i = 0; i < btn.size(); i++) {
+    btn.get(i).update();
+  }  
+}
 float deltaTime() {
   float currentTime = millis();
   if (lastTime == 0) {

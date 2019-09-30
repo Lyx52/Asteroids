@@ -4,13 +4,15 @@ class asteroid {
   float acc = 0.1,
         HP = 100,
         ang = 0,
-        rotSpeed = 0.05;
+        rotSpeed = 0.05,
+        rad = 0;
   boolean remove = false;
-  asteroid(float xpos, float ypos) {
+  asteroid(float xpos, float ypos, float angle, float s) {
     pos = new PVector(xpos, ypos);
     acc *= ts;
-    ang = random(360);
+    ang = angle;
     rotSpeed = random(0.005,0.015);
+    rad = s;
     makeAsteroid();
   }
   void makeAsteroid() {
@@ -36,16 +38,22 @@ class asteroid {
           p.bul.get(b).remove = true;
           HP -= p.staticDamage + random(p.maxCritDamage);
           if (HP <= 0) {
-            remove = true;
+            splitAsteroid();
           }
         }
       }
     }
   }
+  void splitAsteroid() {
+    if (rad > (12 * ts)) {
+      a.add(new asteroid(pos.x, pos.y,ang + random(180), rad / 2));
+      a.add(new asteroid(pos.x, pos.y,ang - random(180), rad / 2));
+    }
+    remove = true;
+  }
   void display() {
     strokeWeight(2);
     noFill();
-    //ellipse(pos.x, pos.y, asteroidSize, asteroidSize);
     pushMatrix();
     translate(pos.x, pos.y);
     for (int i = 0; i < points.length; i++) {

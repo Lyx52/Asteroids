@@ -1,6 +1,6 @@
 class button {
   PVector pos;
-  boolean visible = false, pressed = false;
+  boolean visible = false;
   String title = "";
   int d = 0, touchCount = 0;
   button(String t, int xpos, int ypos, int diam, boolean v) {
@@ -14,8 +14,9 @@ class button {
   }
   void update() {
     display();
-    pressed = returnButton(pos.x, pos.y);  
-    setKey(pressed);
+    if (touches.length > 0) {
+      setKey(returnButton(pos.x, pos.y));
+    } else setKey(false);
   }
   void setKey(boolean b) {
     if (title.equals("left")) {
