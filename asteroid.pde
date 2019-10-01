@@ -52,7 +52,7 @@ class asteroid {
     remove = true;
   }
   void display() {
-    strokeWeight(2);
+    strokeWeight(1);
     noFill();
     pushMatrix();
     translate(pos.x, pos.y);

@@ -1,4 +1,9 @@
+import controlP5.*;
 import android.util.DisplayMetrics;
+
+ControlP5 menuController, settingsController;
+Button play, settings, back;
+
 player p;
 float ts = 0, 
       playerSize = 64, 
@@ -7,19 +12,18 @@ float ts = 0,
       bulletSize = 8,
       currentTime = 0, 
       lastTime = 0, 
-      deltaTime = 0;
-      
+      deltaTime = 0;     
 PVector shootPos, movePos;
-double spawnRate = 30; //Every 30 frames
-String gameState = "ingame"; //Gamestate (ingame;menu;settings)
+double spawnRate = 25; //Every 30 frames
+String gameState = "menu"; //Gamestate (ingame;menu;settings)
 ArrayList<button> btn = new ArrayList<button>();
 ArrayList<asteroid> a = new ArrayList<asteroid>();
-menu mainMenu;
+
+PFont fnt;
 void settings(){
   fullScreen(JAVA2D);
 }
 void setup(){
-  
   //Setup scaling
   orientation(LANDSCAPE); 
   DisplayMetrics metrics = new DisplayMetrics();    
@@ -34,21 +38,42 @@ void setup(){
   playerSize *= ts;
   btnSize *= ts;
   
+  menuController = new ControlP5(this);
+  settingsController = new ControlP5(this);
+  
+  //Settings menu
+  back = settingsController.addButton("Back").setSize((int)(125 * ts),(int)(25 * ts))
+    .setPosition(75 * ts, height - (100 * ts))
+    .setSwitch(false)
+    .setId(0)
+    .setVisible(false);
+    
+  //Main menu  
+  play = menuController.addButton("Play").setSize((int)(225 * ts),(int)(35 * ts))
+    .setPosition(width / 1.5f, height / 1.75f)
+    .setSwitch(false)
+    .setId(1)
+    .setVisible(true);
+  settings = menuController.addButton("Settings").setSize((int)(225 * ts),(int)(35 * ts))
+    .setPosition(width / 1.5f, (height / 1.75f) + (50 * ts))
+    .setSwitch(false)
+    .setId(2)
+    .setVisible(true);
+  
+  
   textAlign(CENTER,CENTER);
   rectMode(CENTER);
   movePos = new PVector(int(width - (100*ts)),int(height - (100*ts)));
   shootPos = new PVector(int(50*ts), int(height - (50*ts)));
-  p = new player(width / 2, width / 2);
+  p = new player(width >> 2, width >> 2);
   createButtons();
-  mainMenu = new menu();
+  fnt = createFont("Monospaced",32);
 }
  
 void draw(){
   background(0);
-  if (gameState.equals("menu")) {
-    mainMenu.update();  
-  } else if (gameState.equals("ingame")) {
-    p = p.HP <= 0 ? new player(width / 2, width / 2) : p;
+  if (gameState.equals("play")) {
+    p = p.HP <= 0 ? new player(width >> 2, width >> 2) : p;
     p.update();
     
     if (a.size() > 0) {
@@ -82,15 +107,46 @@ void draw(){
       }
     }
     
-    for (int i = 0; i < btn.size(); i++) {
-      btn.get(i).update();
-    }
-    
+    thread("checkButtons");    
+        
     deltaTime();
     textSize(12 * ts);
     fill(255);
     text("FPS: " + int(frameRate),20 * ts, height - (18 * ts));
   }  
+}
+void checkButtons() {
+  for (int i = 0; i < btn.size(); i++) {
+    btn.get(i).update();
+  }  
+}
+void controlEvent(ControlEvent theEvent) {
+  if (!gameState.equals("play")) {
+    switch(theEvent.getController().getId()){
+       case 0: {
+         gameState = "menu";
+         play.setVisible(true);
+         settings.setVisible(true);
+         back.setVisible(false);
+         break;
+       }
+       case 1: {
+         gameState = "play";
+         play.setVisible(false);
+         settings.setVisible(false);
+         menuController.setAutoDraw(false);
+         settingsController.setAutoDraw(false);
+         break; 
+       }
+       case 2: {
+         gameState = "settings";
+         play.setVisible(false);
+         settings.setVisible(false);
+         back.setVisible(true);
+         break;
+       }
+    }
+  }
 }
 void createButtons() {
   for (int i = 0; i < 5; i++) {
@@ -117,16 +173,6 @@ void createButtons() {
       }
     }
   }
-}
-void touchesMoved() {
-  for (int i = 0; i < btn.size(); i++) {
-    btn.get(i).update();
-  }  
-}
-void touchesEnded() {
-  for (int i = 0; i < btn.size(); i++) {
-    btn.get(i).update();
-  }  
 }
 float deltaTime() {
   float currentTime = millis();

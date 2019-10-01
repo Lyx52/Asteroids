@@ -2,12 +2,13 @@ class player {
   PVector pos;
   float vx = 0, vy = 0, ang = 0,
         acc = 0.007, rotAcc = 0.07,
-        defacc = 0, staticDamage = 40, maxCritDamage = 4,
+        defacc = 0, staticDamage = 20, maxCritDamage = 4,
         HP = 100;
         
   int bulletLastFrame = 0;
   boolean left = false, right = false, up = false, down = false, shoot = false,
           inverseControls = false;
+          
   ArrayList<bullet> bul = new ArrayList<bullet>();
   player(int xpos, int ypos) {
     pos = new PVector(xpos, ypos); 
@@ -37,12 +38,6 @@ class player {
     
   }
   void shoot() {
-    if (touches.length == 1) {
-      p.left = false;
-      p.right = false;
-      p.up = false;
-      p.down = false;
-    }
     if (frameCount - bulletLastFrame > 10 && shoot){
       bul.add(new bullet(ang)); 
       bulletLastFrame = frameCount;
@@ -54,14 +49,14 @@ class player {
       rotate(ang + HALF_PI);
       noFill();
       stroke(255);
-      strokeWeight(3);
+      strokeWeight(1);
       triangle(-playerSize / 2, playerSize / 2,playerSize / 2, playerSize / 2,0, - playerSize / 2);
       fill(255,0,0);
     popMatrix();
     if (HP != 100) {
       noStroke();
       fill(255,0,0);
-      rect(pos.x, pos.y + 25 * ts, playerSize, 10 * ts);
+      rect(pos.x, pos.y + 35 * ts, playerSize, 10 * ts);
       fill(0,255,0);
       rectMode(CORNER);
       rect(pos.x - playerSize / 2, pos.y + 20 * ts, playerSize * (HP / 100), 10 * ts);
