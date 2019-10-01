@@ -59,7 +59,7 @@ class player {
       rect(pos.x, pos.y + 35 * ts, playerSize, 10 * ts);
       fill(0,255,0);
       rectMode(CORNER);
-      rect(pos.x - playerSize / 2, pos.y + 20 * ts, playerSize * (HP / 100), 10 * ts);
+      rect(pos.x - playerSize / 2, pos.y + 30 * ts, playerSize * (HP / 100), 10 * ts);
       rectMode(CENTER);
       stroke(255);
     }

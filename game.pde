@@ -12,9 +12,10 @@ float ts = 0,
       bulletSize = 8,
       currentTime = 0, 
       lastTime = 0, 
-      deltaTime = 0;     
+      deltaTime = 0;
+long highscore = 0;
 PVector shootPos, movePos;
-double spawnRate = 25; //Every 30 frames
+double spawnRate = 30; //Every 30 frames
 String gameState = "menu"; //Gamestate (ingame;menu;settings)
 ArrayList<button> btn = new ArrayList<button>();
 ArrayList<asteroid> a = new ArrayList<asteroid>();
@@ -42,19 +43,19 @@ void setup(){
   settingsController = new ControlP5(this);
   
   //Settings menu
-  back = settingsController.addButton("Back").setSize((int)(125 * ts),(int)(25 * ts))
+  back = settingsController.addButton("Back",20 * ts).setSize((int)(125 * ts),(int)(25 * ts))
     .setPosition(75 * ts, height - (100 * ts))
     .setSwitch(false)
     .setId(0)
     .setVisible(false);
     
   //Main menu  
-  play = menuController.addButton("Play").setSize((int)(225 * ts),(int)(35 * ts))
+  play = menuController.addButton("Play",20 * ts).setSize((int)(250 * ts),(int)(40 * ts))
     .setPosition(width / 1.5f, height / 1.75f)
     .setSwitch(false)
     .setId(1)
     .setVisible(true);
-  settings = menuController.addButton("Settings").setSize((int)(225 * ts),(int)(35 * ts))
+  settings = menuController.addButton("Settings",20 * ts).setSize((int)(250 * ts),(int)(40 * ts))
     .setPosition(width / 1.5f, (height / 1.75f) + (50 * ts))
     .setSwitch(false)
     .setId(2)
@@ -72,8 +73,16 @@ void setup(){
  
 void draw(){
   background(0);
+  if (gameState.equals("menu") || gameState.equals("settings")) {
+    textSize(30 * ts);  
+  }
   if (gameState.equals("play")) {
-    p = p.HP <= 0 ? new player(width >> 2, width >> 2) : p;
+    if (p.HP <= 0) {
+      restartGame();  
+    }
+    spawnRate -= frameCount % 1200 == 0 && spawnRate >= 20 ? 1 : 0;
+    highscore += frameCount % 3 == 0 ? 1 : 0;
+    
     p.update();
     
     if (a.size() > 0) {
@@ -107,7 +116,9 @@ void draw(){
       }
     }
     
-    thread("checkButtons");    
+    for (int i = 0; i < btn.size(); i++) {
+      btn.get(i).update();
+    }     
         
     deltaTime();
     textSize(12 * ts);
@@ -115,10 +126,13 @@ void draw(){
     text("FPS: " + int(frameRate),20 * ts, height - (18 * ts));
   }  
 }
-void checkButtons() {
-  for (int i = 0; i < btn.size(); i++) {
-    btn.get(i).update();
-  }  
+void restartGame() {
+  p = new player(width >> 2, width >> 2);
+  for (int i = 0; i < a.size(); i++) {
+    a.remove(i);  
+  }
+  spawnRate = 30;
+  highscore = 0;
 }
 void controlEvent(ControlEvent theEvent) {
   if (!gameState.equals("play")) {
