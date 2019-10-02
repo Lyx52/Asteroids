@@ -1,7 +1,7 @@
 class asteroid {
   PVector pos;
   PVector[] points = new PVector[6];
-  float acc = 0.1,
+  float acc = 0.05,
         HP = 100,
         ang = 0,
         rotSpeed = 0.05,
@@ -10,6 +10,7 @@ class asteroid {
   asteroid(float xpos, float ypos, float angle, float s) {
     pos = new PVector(xpos, ypos);
     acc *= ts;
+    acc += random(-0.01f,0.02f);
     ang = angle;
     rotSpeed = random(0.005,0.015);
     rad = s;
@@ -26,29 +27,29 @@ class asteroid {
   }
   void update() {
     display();
-    remove = (pos.x <= -asteroidSize * 2) || (pos.x >= width + asteroidSize * 2) || (pos.y <= -asteroidSize * 2) || (pos.y >= height + asteroidSize * 2);  
+    remove = (pos.x <= -rad * 2) || (pos.x >= width + rad * 2) || (pos.y <= -rad * 2) || (pos.y >= height + rad * 2);  
     pos.x += (acc * cos(ang)) * deltaTime;
     pos.y += (acc * sin(ang)) * deltaTime;
-    if (dist(pos.x, pos.y, p.pos.x, p.pos.y) <= (asteroidSize / 2) + (playerSize / 2)) {
-      //p.HP -= p.staticDamage;
-      p.HP = 0;
+    if (dist(pos.x, pos.y, p.pos.x, p.pos.y) <= (rad / 2) + (playerSize / 2)) {
+      p.HP -= p.staticDamage;
       remove = true;
     } else if (p.bul.size() > 0) {
       for (int b = 0; b < p.bul.size(); b++) {
-        if (dist(p.bul.get(b).bulpos.x, p.bul.get(b).bulpos.y, pos.x, pos.y) <= (bulletSize / 2 + asteroidSize / 2)) {
+        if (dist(p.bul.get(b).bulpos.x, p.bul.get(b).bulpos.y, pos.x, pos.y) <= (bulletSize / 2 + rad / 2)) {
           p.bul.get(b).remove = true;
           HP -= p.staticDamage + random(p.maxCritDamage);
           if (HP <= 0) {
             splitAsteroid();
+            highscore += 1600 / (rad / ts);
           }
         }
       }
     }
   }
   void splitAsteroid() {
-    if (rad > (12 * ts)) {
-      a.add(new asteroid(pos.x, pos.y,ang + random(180), rad / 1.5f));
-      a.add(new asteroid(pos.x, pos.y,ang - random(180), rad / 1.5f));
+    if (rad > (8 * ts)) {
+      a.add(new asteroid(pos.x, pos.y,ang + random(0.5), rad / 1.5f));
+      a.add(new asteroid(pos.x, pos.y,ang + random(-0.5), rad / 1.5f));
     }
     remove = true;
   }
@@ -64,15 +65,6 @@ class asteroid {
       } else line(points[i].x, points[i].y, points[0].x, points[0].y);  
     }
     popMatrix();
-    if (HP != 100) {
-      noStroke();
-      fill(255,0,0);
-      rect(pos.x, pos.y + 25 * ts, asteroidSize, 10 * ts);
-      fill(0,255,0);
-      rectMode(CORNER);
-      rect(pos.x - asteroidSize / 2, pos.y + 20 * ts, asteroidSize * (HP / 100), 10 * ts);
-      rectMode(CENTER);
-      stroke(255);
-    }
+  displayHealth(pos.x, pos.y, rad, HP);
   }
 }
