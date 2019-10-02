@@ -6,8 +6,7 @@ class player {
         HP = 100;
         
   int bulletLastFrame = 0;
-  boolean left = false, right = false, up = false, down = false, shoot = false,
-          inverseControls = false;
+  boolean left = false, right = false, up = false, down = false, shoot = false;
           
   ArrayList<bullet> bul = new ArrayList<bullet>();
   player(int xpos, int ypos) {

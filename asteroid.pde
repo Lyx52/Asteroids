@@ -20,7 +20,7 @@ class asteroid {
       if (i == 6) {
         points[i] = points[0];     
       } else {
-        points[i] = new PVector(sin(i) * (asteroidSize / random(1,2)), cos(i) * (asteroidSize / random(1,2))); 
+        points[i] = new PVector(sin(i) * (rad / random(1,2)), cos(i) * (rad / random(1,2))); 
       }
     }
   }
@@ -30,7 +30,8 @@ class asteroid {
     pos.x += (acc * cos(ang)) * deltaTime;
     pos.y += (acc * sin(ang)) * deltaTime;
     if (dist(pos.x, pos.y, p.pos.x, p.pos.y) <= (asteroidSize / 2) + (playerSize / 2)) {
-      p.HP -= p.staticDamage;
+      //p.HP -= p.staticDamage;
+      p.HP = 0;
       remove = true;
     } else if (p.bul.size() > 0) {
       for (int b = 0; b < p.bul.size(); b++) {
@@ -46,8 +47,8 @@ class asteroid {
   }
   void splitAsteroid() {
     if (rad > (12 * ts)) {
-      a.add(new asteroid(pos.x, pos.y,ang + random(180), rad / 2));
-      a.add(new asteroid(pos.x, pos.y,ang - random(180), rad / 2));
+      a.add(new asteroid(pos.x, pos.y,ang + random(180), rad / 1.5f));
+      a.add(new asteroid(pos.x, pos.y,ang - random(180), rad / 1.5f));
     }
     remove = true;
   }

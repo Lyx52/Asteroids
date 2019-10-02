@@ -1,8 +1,15 @@
 import controlP5.*;
 import android.util.DisplayMetrics;
+import android.os.Environment;
+import java.io.BufferedReader; 
+import java.io.FileInputStream; 
+import java.io.FileNotFoundException; 
+import java.io.FileOutputStream; 
+import java.io.IOException; 
+import java.io.InputStreamReader; 
 
-ControlP5 menuController, settingsController;
-Button play, settings, back;
+ControlP5 menuController, settingsController, ingameController;
+Button play, settings, back, restart;
 
 player p;
 float ts = 0, 
@@ -13,12 +20,16 @@ float ts = 0,
       currentTime = 0, 
       lastTime = 0, 
       deltaTime = 0;
-long highscore = 0;
+int highscore = 0;
 PVector shootPos, movePos;
 double spawnRate = 30; //Every 30 frames
-String gameState = "menu"; //Gamestate (ingame;menu;settings)
+String gameState = "menu"; //Gamestate (ingame;menu;settings;highscores)
+boolean inverseControls = false;
+
 ArrayList<button> btn = new ArrayList<button>();
 ArrayList<asteroid> a = new ArrayList<asteroid>();
+
+XML highscoreFile, settingsFile;
 
 PFont fnt;
 void settings(){
@@ -39,14 +50,18 @@ void setup(){
   playerSize *= ts;
   btnSize *= ts;
   
+  fnt = createFont("Monospaced",32 * ts);
+  
   menuController = new ControlP5(this);
   settingsController = new ControlP5(this);
+  ingameController = new ControlP5(this);
   
   //Settings menu
   back = settingsController.addButton("Back",20 * ts).setSize((int)(125 * ts),(int)(25 * ts))
     .setPosition(75 * ts, height - (100 * ts))
     .setSwitch(false)
     .setId(0)
+    .setFont(fnt)
     .setVisible(false);
     
   //Main menu  
@@ -54,13 +69,23 @@ void setup(){
     .setPosition(width / 1.5f, height / 1.75f)
     .setSwitch(false)
     .setId(1)
+    .setFont(fnt)
     .setVisible(true);
   settings = menuController.addButton("Settings",20 * ts).setSize((int)(250 * ts),(int)(40 * ts))
     .setPosition(width / 1.5f, (height / 1.75f) + (50 * ts))
     .setSwitch(false)
     .setId(2)
+    .setFont(fnt)
     .setVisible(true);
-  
+    
+  //Ingame controls
+  PFont temp = createFont("Monospace",13 * ts);
+  restart = ingameController.addButton("Restart game....",20 * ts).setSize((int)(125 * ts),(int)(25 * ts))
+    .setPosition(75 * ts, height - (100 * ts))
+    .setSwitch(false)
+    .setId(3)
+    .setFont(temp)
+    .setVisible(false);
   
   textAlign(CENTER,CENTER);
   rectMode(CENTER);
@@ -68,15 +93,26 @@ void setup(){
   shootPos = new PVector(int(50*ts), int(height - (50*ts)));
   p = new player(width >> 2, width >> 2);
   createButtons();
-  fnt = createFont("Monospaced",32);
+  
+  //Ingame settings
+  if (!hasPermission("android.permission.READ_EXTERNAL_STORAGE")) {
+    requestPermission("android.permission.READ_EXTERNAL_STORAGE");  
+  } else if (!hasPermission("android.permission.WRITE_EXTERNAL_STORAGE")) {
+    requestPermission("android.permission.WRITE_EXTERNAL_STORAGE");  
+  } else {
+    highscoreFile = loadXML(sketchPath + "/data/highscore.xml");
+    settingsFile = loadXML("settings.xml");
+    inverseControls = settingsFile.getChild("invertControls").getName().equals("true");
+  }
 }
  
 void draw(){
   background(0);
   if (gameState.equals("menu") || gameState.equals("settings")) {
-    textSize(30 * ts);  
-  }
-  if (gameState.equals("play")) {
+    textSize(30 * ts);
+  } else if (gameState.equals("highscores")) {
+    displayScoreTable();
+  } else if (gameState.equals("play")) {
     if (p.HP <= 0) {
       restartGame();  
     }
@@ -127,12 +163,13 @@ void draw(){
   }  
 }
 void restartGame() {
+  updateScoreTable();
+  gameState = "highscores";
   p = new player(width >> 2, width >> 2);
   for (int i = 0; i < a.size(); i++) {
     a.remove(i);  
   }
   spawnRate = 30;
-  highscore = 0;
 }
 void controlEvent(ControlEvent theEvent) {
   if (!gameState.equals("play")) {
@@ -157,6 +194,12 @@ void controlEvent(ControlEvent theEvent) {
          play.setVisible(false);
          settings.setVisible(false);
          back.setVisible(true);
+         break;
+       }
+       case 3: {
+         gameState = "play";
+         highscore = 0;
+         restart.setVisible(false);
          break;
        }
     }
@@ -187,6 +230,34 @@ void createButtons() {
       }
     }
   }
+}
+void updateScoreTable() {
+  IntList temp = new IntList();
+  for (int i = 0; i < 10; i++) {
+    temp.append(highscoreFile.getChild("score" + i).getIntContent());  
+  }
+  temp.append(highscore);
+  temp.sortReverse();
+  for (int i = 0; i < 10; i++) {
+    highscoreFile.getChild("score" + i).setContent(str(temp.get(i))); 
+  }
+  saveXML(highscoreFile,sketchPath + "/data/highscore.xml");
+  highscoreFile = loadXML(sketchPath + "/data/highscore.xml");
+}
+void displayScoreTable() {
+  restart.setVisible(true);
+  pushStyle();
+  fill(255);
+  textSize(40);
+  int temp = 0;
+  text("HIGHSCORES", width / 1.9f, 55 * ts);
+  for (int i = 0; i < 10; i++) {
+    if (highscoreFile.getChild("score" + i).getIntContent() == highscore) {
+      text("Score: " + highscoreFile.getChild("score" + i).getContent() + " <-- Last score", width / 1.9f, (110 * ts) + temp);
+    } else text("Score: " + highscoreFile.getChild("score" + i).getContent(), width / 1.9f, (110 * ts) + temp); 
+    temp += 35 * ts;
+  }
+  popStyle();
 }
 float deltaTime() {
   float currentTime = millis();
