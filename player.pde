@@ -52,6 +52,15 @@ class player {
       triangle(-playerSize / 2, playerSize / 2,playerSize / 2, playerSize / 2,0, - playerSize / 2);
       fill(255,0,0);
     popMatrix();
-  displayHealth(pos.x, pos.y, playerSize, HP);
+    if (HP != 100) {
+      noStroke();
+      fill(255,0,0);
+      rect(pos.x, pos.y + 35 * ts, playerSize, 10 * ts);
+      fill(0,255,0);
+      rectMode(CORNER);
+      rect(pos.x - playerSize / 2, pos.y + 30 * ts, playerSize * (HP / 100), 10 * ts);
+      rectMode(CENTER);
+      stroke(255);
+    }
   }
 }
