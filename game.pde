@@ -1,20 +1,14 @@
 import controlP5.*;
 import android.util.DisplayMetrics;
-import android.os.Environment;
-import java.io.BufferedReader; 
-import java.io.FileInputStream; 
-import java.io.FileNotFoundException; 
-import java.io.FileOutputStream; 
-import java.io.IOException; 
-import java.io.InputStreamReader; 
 
 ControlP5 menuController, settingsController, ingameController;
 Button play, settings, back, restart;
+Toggle invCtrl;
 
 player p;
 float ts = 0, 
       playerSize = 64, 
-      asteroidSize = 48, 
+      asteroidSize = 32, 
       btnSize = 80, 
       bulletSize = 8,
       currentTime = 0, 
@@ -22,7 +16,7 @@ float ts = 0,
       deltaTime = 0;
 int highscore = 0;
 PVector shootPos, movePos;
-double spawnRate = 30; //Every 30 frames
+double spawnRate = 90; //Every 60 frames
 String gameState = "menu"; //Gamestate (ingame;menu;settings;highscores)
 boolean inverseControls = false;
 
@@ -62,7 +56,7 @@ void setup(){
     .setSwitch(false)
     .setId(0)
     .setFont(fnt)
-    .setVisible(false);
+    .setVisible(false); 
     
   //Main menu  
   play = menuController.addButton("Play",20 * ts).setSize((int)(250 * ts),(int)(40 * ts))
@@ -86,6 +80,13 @@ void setup(){
     .setId(3)
     .setFont(temp)
     .setVisible(false);
+  PFont temp1 = createFont("Monospace",16 * ts);  
+  invCtrl = settingsController.addToggle("Enable Inverse controls",false).setSize((int)(125 * ts),(int)(25 * ts))
+    .setPosition(width / 1.5f, height / 1.75f)
+    .setId(4)
+    .setMode(ControlP5.SWITCH)
+    .setFont(temp1)
+    .setVisible(false); 
   
   textAlign(CENTER,CENTER);
   rectMode(CENTER);
@@ -103,6 +104,7 @@ void setup(){
     highscoreFile = loadXML(sketchPath + "/data/highscore.xml");
     settingsFile = loadXML("settings.xml");
     inverseControls = settingsFile.getChild("invertControls").getName().equals("true");
+    invCtrl.setState(inverseControls);
   }
 }
  
@@ -134,19 +136,27 @@ void draw(){
     if (frameCount % spawnRate == 0) {
       switch(int(random(0,3))) {
         case 0 : {
-          a.add(new asteroid(int(random(-asteroidSize, -asteroidSize / 4)), int(random(-asteroidSize, height + asteroidSize)), random(360), asteroidSize));
+          PVector temp = new PVector(random(-asteroidSize, -asteroidSize / 4), random(-asteroidSize, height + asteroidSize));
+          float ang = atan2((p.pos.y + (random(-200,200) * ts)) - temp.y, (p.pos.x + (random(-200,200) * ts)) - temp.x);
+          a.add(new asteroid(int(temp.x), int(temp.y), ang, asteroidSize));
           break;
         }
         case 1 : {
-          a.add(new asteroid(int(random(-asteroidSize, width + asteroidSize)), int(random(-asteroidSize, -asteroidSize / 4)), random(360), asteroidSize));
+          PVector temp = new PVector(random(-asteroidSize, width + asteroidSize),random(-asteroidSize, -asteroidSize / 4));
+          float ang = atan2((p.pos.y + (random(-200,200) * ts)) - temp.y, (p.pos.x + (random(-200,200) * ts)) - temp.x);
+          a.add(new asteroid(int(temp.x), int(temp.y), ang, asteroidSize));
           break;
         }
         case 2 : {
-          a.add(new asteroid(int(random(width + asteroidSize / 4, width + asteroidSize)), int(random(-asteroidSize, height + asteroidSize)), random(360), asteroidSize));
+          PVector temp = new PVector(random(width + asteroidSize / 4, width + asteroidSize),random(-asteroidSize, height + asteroidSize));
+          float ang = atan2((p.pos.y + (random(-200,200) * ts)) - temp.y, (p.pos.x + (random(-200,200) * ts)) - temp.x);
+          a.add(new asteroid(int(temp.x), int(temp.y), ang, asteroidSize));
           break;
         }
         case 3 : {
-          a.add(new asteroid(int(random(-asteroidSize, width + asteroidSize)), int(random(height + asteroidSize / 4, height + asteroidSize)), random(360), asteroidSize));
+          PVector temp = new PVector(random(-asteroidSize, width + asteroidSize),random(height + asteroidSize / 4, height + asteroidSize));
+          float ang = atan2((p.pos.y + (random(-200,200) * ts)) - temp.y, (p.pos.x + (random(-200,200) * ts)) - temp.x);
+          a.add(new asteroid(int(temp.x), int(temp.y), ang, asteroidSize));
           break;
         }
       }
@@ -164,12 +174,10 @@ void draw(){
 }
 void restartGame() {
   updateScoreTable();
+  a.clear();
   gameState = "highscores";
   p = new player(width >> 2, width >> 2);
-  for (int i = 0; i < a.size(); i++) {
-    a.remove(i);  
-  }
-  spawnRate = 30;
+  spawnRate = 60;
 }
 void controlEvent(ControlEvent theEvent) {
   if (!gameState.equals("play")) {
@@ -178,6 +186,7 @@ void controlEvent(ControlEvent theEvent) {
          gameState = "menu";
          play.setVisible(true);
          settings.setVisible(true);
+         invCtrl.setVisible(false);
          back.setVisible(false);
          break;
        }
@@ -193,6 +202,7 @@ void controlEvent(ControlEvent theEvent) {
          gameState = "settings";
          play.setVisible(false);
          settings.setVisible(false);
+         invCtrl.setVisible(true);
          back.setVisible(true);
          break;
        }
@@ -202,8 +212,24 @@ void controlEvent(ControlEvent theEvent) {
          restart.setVisible(false);
          break;
        }
+       case 4: {
+         inverseControls = invCtrl.getBooleanValue();
+         String temp = "";
+         if (inverseControls) {
+           temp = "true";    
+         } else temp = "false";
+         println(settingsFile.getChild("invertControls").getContent());
+         settingsFile.getChild("invertControls").setContent(temp);
+         println(settingsFile.getChild("invertControls").getContent());
+         break;
+       }
     }
   }
+}
+void backPressed() {
+  if (gameState.equals("play")) {
+    gameState.equals("menu");  
+  } else exit();
 }
 void createButtons() {
   for (int i = 0; i < 5; i++) {
@@ -244,6 +270,7 @@ void updateScoreTable() {
   saveXML(highscoreFile,sketchPath + "/data/highscore.xml");
   highscoreFile = loadXML(sketchPath + "/data/highscore.xml");
 }
+
 void displayScoreTable() {
   restart.setVisible(true);
   pushStyle();
@@ -258,6 +285,22 @@ void displayScoreTable() {
     temp += 35 * ts;
   }
   popStyle();
+}
+
+void displayHealth(float xpos, float ypos, float size, float hp) {
+  if (hp != 100) {
+    pushStyle();
+        noStroke();
+        fill(255,0,0);
+        rect(xpos, ypos + 35 * ts, size, 10 * ts);
+        fill(0,255,0);
+        rectMode(CORNER);
+        rect(xpos - size / 2, ypos + 30 * ts, size * (hp / 100), 10 * ts);
+        rectMode(CENTER);
+        stroke(255);
+    popStyle();
+  }
+  return;
 }
 float deltaTime() {
   float currentTime = millis();
