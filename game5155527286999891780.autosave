@@ -1,9 +1,14 @@
 import controlP5.*;
 import android.util.DisplayMetrics;
-
+import android.os.Environment;
+import java.io.BufferedReader; 
+import java.io.FileInputStream; 
+import java.io.FileNotFoundException; 
+import java.io.FileOutputStream; 
+import java.io.IOException; 
+import java.io.InputStreamReader; 
 ControlP5 menuController, settingsController, ingameController;
 Button play, settings, back, restart;
-Toggle invCtrl;
 
 player p;
 float ts = 0, 
@@ -80,14 +85,7 @@ void setup(){
     .setId(3)
     .setFont(temp)
     .setVisible(false);
-  PFont temp1 = createFont("Monospace",16 * ts);  
-  invCtrl = settingsController.addToggle("Enable Inverse controls",false).setSize((int)(125 * ts),(int)(25 * ts))
-    .setPosition(width / 1.5f, height / 1.75f)
-    .setId(4)
-    .setMode(ControlP5.SWITCH)
-    .setFont(temp1)
-    .setVisible(false); 
-  
+    
   textAlign(CENTER,CENTER);
   rectMode(CENTER);
   movePos = new PVector(int(width - (100*ts)),int(height - (100*ts)));
@@ -102,6 +100,7 @@ void setup(){
     requestPermission("android.permission.WRITE_EXTERNAL_STORAGE");  
   } else {
     highscoreFile = loadXML(sketchPath + "/data/highscore.xml");
+    println(highscoreFile.getChild("score0").getContent());
     settingsFile = loadXML("settings.xml");
     inverseControls = settingsFile.getChild("invertControls").getName().equals("true");
   }
@@ -185,7 +184,6 @@ void controlEvent(ControlEvent theEvent) {
          gameState = "menu";
          play.setVisible(true);
          settings.setVisible(true);
-         invCtrl.setVisible(false);
          back.setVisible(false);
          break;
        }
@@ -201,7 +199,6 @@ void controlEvent(ControlEvent theEvent) {
          gameState = "settings";
          play.setVisible(false);
          settings.setVisible(false);
-         invCtrl.setVisible(true);
          back.setVisible(true);
          break;
        }
@@ -209,17 +206,6 @@ void controlEvent(ControlEvent theEvent) {
          gameState = "play";
          highscore = 0;
          restart.setVisible(false);
-         break;
-       }
-       case 4: {
-         inverseControls = invCtrl.getBooleanValue();
-         String temp = "";
-         if (inverseControls) {
-           temp = "true";    
-         } else temp = "false";
-         println(settingsFile.getChild("invertControls").getContent());
-         settingsFile.getChild("invertControls").setContent(temp);
-         println(settingsFile.getChild("invertControls").getContent());
          break;
        }
     }
